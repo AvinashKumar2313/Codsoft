@@ -1,0 +1,109 @@
+# Codsoft
+Machine Learning Internship at Codsoft
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Load the datasets
+df_train = pd.read_csv("fraudTrain.csv")
+df_test = pd.read_csv("fraudTest.csv")
+
+# Check the data
+print("Training data shape:", df_train.shape)
+print("Test data shape:", df_test.shape)
+
+# Separate features and target variable
+X_train = df_train.drop("is_fraud", axis=1)
+y_train = df_train["is_fraud"]
+X_test = df_test.drop("is_fraud", axis=1)
+y_test = df_test["is_fraud"]
+print(df_train.columns)
+print(df_test.columns)
+
+# Drop non-numeric columns
+non_numeric_columns = ['trans_date_trans_time', 'merchant', 'category', 'first', 'last', 'gender', 'street', 'city', 'state', 'job', 'dob', 'trans_num']
+X_train_numeric = X_train.drop(non_numeric_columns, axis=1)
+X_test_numeric = X_test.drop(non_numeric_columns, axis=1)
+
+
+
+# Logistic Regression
+# Standardize the features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train_numeric)
+X_test_scaled = scaler.transform(X_test_numeric)
+
+# Create and train the Logistic Regression model
+lr_model = LogisticRegression()
+lr_model.fit(X_train_scaled, y_train)
+
+# Make predictions on the test set
+lr_pred = lr_model.predict(X_test_scaled)
+
+# Print out the results
+print("Logistic Regression Results:")
+print("Accuracy:", accuracy_score(y_test, lr_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, lr_pred))
+print("Classification Report:\n", classification_report(y_test, lr_pred))
+
+
+
+# Decision Tree
+dt_model = DecisionTreeClassifier()
+dt_model.fit(X_train_scaled, y_train)
+dt_pred = dt_model.predict(X_test_scaled)
+
+print("Decision Tree Results:")
+print("Accuracy:", accuracy_score(y_test, dt_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, dt_pred))
+print("Classification Report:\n", classification_report(y_test, dt_pred))
+
+
+
+# Random Forest
+rf_model = RandomForestClassifier()
+rf_model.fit(X_train_scaled, y_train)
+rf_pred = rf_model.predict(X_test_scaled)
+
+# Print out the results
+print("\nRandom Forest Results:")
+print("Accuracy:", accuracy_score(y_test, rf_pred))
+print("Confusion Matrix:\n", confusion_matrix(y_test, rf_pred))
+print("Classification Report:\n", classification_report(y_test, rf_pred))
+
+# Initialize models
+lr_model = LogisticRegression()
+dt_model = DecisionTreeClassifier()
+rf_model = RandomForestClassifier()
+
+# Train models
+lr_model.fit(X_train_scaled, y_train)
+dt_model.fit(X_train_scaled, y_train)
+rf_model.fit(X_train_scaled, y_train)
+
+# Make predictions
+lr_pred = lr_model.predict(X_test_scaled)
+dt_pred = dt_model.predict(X_test_scaled)
+rf_pred = rf_model.predict(X_test_scaled)
+
+# Calculate accuracies
+lr_accuracy = accuracy_score(y_test, lr_pred)
+dt_accuracy = accuracy_score(y_test, dt_pred)
+rf_accuracy = accuracy_score(y_test, rf_pred) 
+
+# Plot the accuracies
+models = ['Logistic Regression', 'Decision Tree', 'Random Forest']
+accuracies = [lr_accuracy, dt_accuracy, rf_accuracy]
+
+plt.figure(figsize=(10, 6))
+plt.bar(models, accuracies, color=['blue', 'green', 'red'])
+plt.xlabel('Models')
+plt.ylabel('Accuracy')
+plt.title('Accuracy of Different Models')
+plt.ylim(0.8, 1)  # Set y-axis limits for better visualization
+plt.show()
