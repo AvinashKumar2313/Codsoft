@@ -1,6 +1,6 @@
 # Codsoft
 Machine Learning Internship at Codsoft
-
+#importing all the required libraries
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -30,8 +30,6 @@ non_numeric_columns = ['trans_date_trans_time', 'merchant', 'category', 'first',
 X_train_numeric = X_train.drop(non_numeric_columns, axis=1)
 X_test_numeric = X_test.drop(non_numeric_columns, axis=1)
 
-
-
 # Logistic Regression
 # Standardize the features
 scaler = StandardScaler()
@@ -51,8 +49,6 @@ print("Accuracy:", accuracy_score(y_test, lr_pred))
 print("Confusion Matrix:\n", confusion_matrix(y_test, lr_pred))
 print("Classification Report:\n", classification_report(y_test, lr_pred))
 
-
-
 # Decision Tree
 dt_model = DecisionTreeClassifier()
 dt_model.fit(X_train_scaled, y_train)
@@ -62,8 +58,6 @@ print("Decision Tree Results:")
 print("Accuracy:", accuracy_score(y_test, dt_pred))
 print("Confusion Matrix:\n", confusion_matrix(y_test, dt_pred))
 print("Classification Report:\n", classification_report(y_test, dt_pred))
-
-
 
 # Random Forest
 rf_model = RandomForestClassifier()
@@ -106,4 +100,14 @@ plt.xlabel('Models')
 plt.ylabel('Accuracy')
 plt.title('Accuracy of Different Models')
 plt.ylim(0.8, 1)  # Set y-axis limits for better visualization
-plt.show()
+plt.show() 
+
+#conclusion
+In this credit card fraud detection analysis using Kaggle dataset of both fraudTest.csv and fraud.Train,
+we trained Logistic Regression, Decision Tree, and Random Forest models. 
+In conclusion, both Logistic Regression and Random Forest algorithms exhibited commendable performance in classification tasks, 
+particularly in the context of credit card fraud detection. Logistic Regression, with its simplicity and interpretability,
+stood out as a reliable choice, while Random Forest's ensemble learning approach showcased its capability to handle complex classification problems effectively.
+Both models demonstrated high accuracy, F1 score, and recall rates, highlighting their effectiveness in accurately identifying instances of interest, such as fraudulent transactions.
+The combination of these algorithms underscores the versatility and efficacy of machine learning techniques in addressing real-world classification challenges,
+offering valuable insights for fraud detection and other classification applications.
