@@ -103,7 +103,7 @@ plt.ylim(0.8, 1)  # Set y-axis limits for better visualization
 plt.show() 
 
 #conclusion
-In this credit card fraud detection analysis using Kaggle dataset of both fraudTest.csv and fraud.Train,
+In this credit card fraud detection analysis using Kaggle dataset of both fraudTest.csv and fraudTrain.csv,
 we trained Logistic Regression, Decision Tree, and Random Forest models. 
 In conclusion, both Logistic Regression and Random Forest algorithms exhibited commendable performance in classification tasks, 
 particularly in the context of credit card fraud detection. Logistic Regression, with its simplicity and interpretability,
