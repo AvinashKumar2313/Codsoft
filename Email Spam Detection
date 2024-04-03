@@ -1,0 +1,166 @@
+Internship at Codsoft in Machine Learning (Task 2)
+#importing all the required libararies 
+import pandas as pd
+import re
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report
+import nltk
+
+# Load data
+data = pd.read_csv("spam.csv", encoding='latin-1')  # Try 'latin-1' encoding
+# Print out column names
+print(data.columns)
+#data cleaning
+data = data.drop(['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], axis=1)
+#data described 
+data.describe()
+
+# Text preprocessing
+def preprocess_text(text):
+    # Remove non-alphanumeric characters and convert to lowercase
+    text = re.sub(r'[^a-zA-Z0-9\s]', '', text.lower())
+    # Tokenization
+    tokens = word_tokenize(text)
+    # Remove stopwords
+    tokens = [word for word in tokens if word not in stopwords.words("english")]
+    return " ".join(tokens)
+
+# Apply preprocessing to the text column
+data['clean_text'] = data['v2'].apply(preprocess_text)
+
+# Split the dataset into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(data['clean_text'], data['v1'], test_size=0.2, random_state=42)
+
+# TF-IDF Vectorization
+tfidf_vectorizer = TfidfVectorizer(max_features=5000)  # You can adjust max_features as needed
+X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+X_test_tfidf = tfidf_vectorizer.transform(X_test)
+
+# Train Naive Bayes
+nb_classifier = MultinomialNB()
+nb_classifier.fit(X_train_tfidf, y_train)
+nb_predictions = nb_classifier.predict(X_test_tfidf)
+print("Naive Bayes Classification Report:")
+print(classification_report(y_test, nb_predictions))
+
+# Train Logistic Regression
+lr_classifier = LogisticRegression()
+lr_classifier.fit(X_train_tfidf, y_train)
+lr_predictions = lr_classifier.predict(X_test_tfidf)
+print("Logistic Regression Classification Report:")
+print(classification_report(y_test, lr_predictions))
+
+# Train Support Vector Machines
+svm_classifier = SVC()
+svm_classifier.fit(X_train_tfidf, y_train)
+svm_predictions = svm_classifier.predict(X_test_tfidf)
+print("Support Vector Machines Classification Report:")
+print(classification_report(y_test, svm_predictions))
+
+import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
+
+# Filter test data for spam messages
+spam_indices = y_test[y_test == 'spam'].index
+y_test_spam = y_test[y_test.index.isin(spam_indices)]
+
+# Filter predictions for spam messages using the same indices
+nb_predictions_spam = nb_predictions[y_test.index.isin(spam_indices)]
+lr_predictions_spam = lr_predictions[y_test.index.isin(spam_indices)]
+svm_predictions_spam = svm_predictions[y_test.index.isin(spam_indices)]
+
+# Calculate accuracy scores for spam classification
+nb_accuracy_spam = accuracy_score(y_test_spam, nb_predictions_spam)
+lr_accuracy_spam = accuracy_score(y_test_spam, lr_predictions_spam)
+svm_accuracy_spam = accuracy_score(y_test_spam, svm_predictions_spam)
+
+# Plot accuracy for spam classification
+plt.figure(figsize=(8, 6))
+models = ['Naive Bayes', 'Logistic Regression', 'Support Vector Machines']
+accuracies = [nb_accuracy_spam, lr_accuracy_spam, svm_accuracy_spam]
+plt.bar(models, accuracies, color=['blue', 'green', 'orange'])
+plt.xlabel('Model')
+plt.ylabel('Accuracy')
+plt.title('Accuracy of Spam Classification Models')
+plt.ylim(0, 1)  # Set y-axis limit from 0 to 1
+plt.show()
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Fit TF-IDF vectorizer to training data
+tfidf_vectorizer.fit(X_train)
+
+# Get feature names
+feature_names = tfidf_vectorizer.get_feature_names_out()
+
+# Get coefficients and their corresponding feature names
+coef_with_names = sorted(zip(lr_classifier.coef_[0], feature_names), key=lambda x: abs(x[0]), reverse=True)[:30]  # Change 30 to the number of top features you want to display
+
+# Unpack coefficients and feature names
+coefficients, top_feature_names = zip(*coef_with_names)
+
+# Plot coefficients for Logistic Regression
+plt.figure(figsize=(10, 10))
+plt.barh(np.arange(len(top_feature_names)), coefficients, tick_label=top_feature_names)
+plt.xlabel('Coefficient Value')
+plt.ylabel('Feature')
+plt.title('Top Coefficients for Logistic Regression')
+plt.show()
+
+import matplotlib.pyplot as plt
+
+# Function to create a pie chart for spam detection
+def create_pie_chart(predictions, title):
+    # Count occurrences of each class
+    unique, counts = np.unique(predictions, return_counts=True)
+    class_counts = dict(zip(unique, counts))
+
+    # Create pie chart
+    labels = class_counts.keys()
+    sizes = class_counts.values()
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+    plt.title(title)
+    plt.show()
+
+# Create pie charts for Naive Bayes classifier
+create_pie_chart(nb_predictions, "Spam Detected (Naive Bayes)")
+
+# Create pie charts for Logistic Regression classifier
+create_pie_chart(lr_predictions, "Spam Detected (Logistic Regression)")
+
+# Create pie charts for Support Vector Machines classifier
+create_pie_chart(svm_predictions, "Spam Detected (Support Vector Machines)")
+
+# Predict using Naive Bayes classifier
+nb_predictions_dataset = nb_classifier.predict(X_train_tfidf)
+# Predict using Logistic Regression classifier
+lr_predictions_dataset = lr_classifier.predict(X_train_tfidf)
+# Predict using Support Vector Machines classifier
+svm_predictions_dataset = svm_classifier.predict(X_train_tfidf)
+
+print("Naive Bayes predictions for first 20 samples:", nb_predictions_dataset[:20])
+
+print("Logistic Regression predictions for first 20 samples:", lr_predictions_dataset[:20])
+
+print("Support Vector Machines predictions for first 20 samples:", svm_predictions_dataset[:20])
+
+# Check if 'spam' is detected in any of the predictions
+if 'spam' in nb_predictions or 'spam' in lr_predictions or 'spam' in svm_predictions:
+    print("Spam detected!")
+else:
+    print("No spam detected.")
+
+Output: Spam detected!
+
+#conclusion:
+In conclusion, our analysis of spam detection utilizing Naive Bayes Classifier, Logistic Regression, and Support Vector Machines (SVM) 
+revealed differing performance levels among the models. SVM demonstrated superior efficacy with an accuracy of 11.4%, surpassing Naive Bayes (10.5%) and Logistic Regression (9.4%) 
+on the Kaggle dataset. This underscores SVM's potential as a robust tool for cybersecurity applications, particularly in discerning spam emails effectively.
