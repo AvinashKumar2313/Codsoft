@@ -163,4 +163,4 @@ Output: Spam detected!
 #conclusion:
 In conclusion, our analysis of spam detection utilizing Naive Bayes Classifier, Logistic Regression, and Support Vector Machines (SVM) 
 revealed differing performance levels among the models. SVM demonstrated superior efficacy with an accuracy of 11.4%, surpassing Naive Bayes (10.5%) and Logistic Regression (9.4%) 
-on the Kaggle dataset. This underscores SVM's potential as a robust tool for cybersecurity applications, particularly in discerning spam emails effectively.
+on the Kaggle dataset. This underscores SVM's potential as a robust tool for cybersecurity applications, particularly in discerning spam SMS effectively.
