@@ -1,0 +1,301 @@
+#Internship at Codsoft (Task 3)
+#importing all required libraries 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+# Load the dataset
+df = pd.read_csv('Churn_Modelling.csv')
+# data described
+df.describe()
+
+# printing 15 data from dataset given
+df.head(15)
+
+from tabulate import tabulate
+# Get the information from df.info()
+info_str = df.info(verbose=True)
+# Check if info_str is not None
+if info_str is not None:
+    # Print the information as a table
+    print(tabulate([info_str.split('\n')[1:-1]], headers='keys', tablefmt='pretty'))
+else:
+    print("No information available.")
+
+df.describe(include=object).T
+
+df.dtypes
+
+df[df['Gender']=='Male']['Exited'].value_counts()
+
+import pandas as pd
+# Filter churned customers
+churned_customers = df[df['Exited'] == 1]
+# Display churned customers as a table
+print(churned_customers.head(50).to_string(index=False))
+
+total_male_customers = df[df['Gender'] == 'Male'].shape[0]  # Total number of male customers
+churned_male_customers = df[(df['Gender'] == 'Male') & (df['Exited'] == 1)].shape[0]  # Number of churned male customers
+
+if total_male_customers != 0:
+    percentage_churned_male = (churned_male_customers / total_male_customers) * 100  # Percentage of churned male customers
+    print("Percentage of churned male customers:", percentage_churned_male)
+else:
+    print("No male customers in the dataset.")
+
+
+# Total number of female customers
+total_female_customers = df[df['Gender'] == 'Female'].shape[0]
+
+if total_female_customers != 0:
+    # Number of churned female customers
+    churned_female_customers = df[(df['Gender'] == 'Female') & (df['Exited'] == 1)].shape[0]
+
+    # Percentage of churned female customers
+    percentage_churned_female = (churned_female_customers / total_female_customers) * 100
+
+    print("Percentage of churned female customers:", percentage_churned_female)
+else:
+    print("There are no female customers in the dataset.")
+
+
+import matplotlib.pyplot as plt
+# Plotting the bar graph
+labels = ['Male', 'Female']
+churn_percentages = [percentage_churned_male, percentage_churned_female]
+
+plt.bar(labels, churn_percentages, color=['blue', 'red'])
+plt.xlabel('Gender')
+plt.ylabel('Churn Percentage')
+plt.title('Churn Percentage by Gender')
+plt.show()
+
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Grouping data by Gender and Exited to get churn counts
+churn_counts = df.groupby(['Gender', 'Exited']).size().reset_index(name='Count')
+
+# Plotting churn of male and female customers
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Gender', y='Count', hue='Exited', data=churn_counts)
+plt.title('Churn of Male and Female Customers')
+plt.xlabel('Gender')
+plt.ylabel('Count')
+plt.show()
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load the dataset into a DataFrame
+df = pd.read_csv('Churn_Modelling.csv')
+
+# Drop irrelevant columns and split into features (X) and target variable (y)
+X = df.drop(columns=['RowNumber', 'CustomerId', 'Surname', 'Exited'])
+y = df['Exited']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Define categorical and numerical features
+categorical_features = ['Geography', 'Gender']
+numerical_features = [col for col in X.columns if col not in categorical_features]
+
+# Preprocessing: scale numerical features and one-hot encode categorical features
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), numerical_features),
+        ('cat', OneHotEncoder(), categorical_features)
+    ])
+
+# Transform the training and testing data
+X_train_scaled = preprocessor.fit_transform(X_train)
+X_test_scaled = preprocessor.transform(X_test)
+
+# Model training
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train_scaled, y_train)
+
+# Model evaluation
+y_pred = model.predict(X_test_scaled)
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+print("Random Forest Classification Report:")
+print(classification_report(y_test, y_pred))
+
+from sklearn.linear_model import LogisticRegression
+# Logistic Regression model
+logistic_model = LogisticRegression(random_state=42)
+logistic_model.fit(X_train_scaled, y_train)
+y_pred_logistic = logistic_model.predict(X_test_scaled)
+accuracy_logistic = accuracy_score(y_test, y_pred_logistic)
+print("Logistic Regression Accuracy:", accuracy_logistic)
+print("Logistic Regression Classification Report:")
+print(classification_report(y_test, y_pred_logistic))
+
+from sklearn.ensemble import GradientBoostingClassifier
+# Gradient Boosting model
+gradient_boosting_model = GradientBoostingClassifier(random_state=42)
+gradient_boosting_model.fit(X_train_scaled, y_train)
+y_pred_gb = gradient_boosting_model.predict(X_test_scaled)
+accuracy_gb = accuracy_score(y_test, y_pred_gb)
+print("Gradient Boosting Accuracy:", accuracy_gb)
+print("Gradient Boosting Classification Report:")
+print(classification_report(y_test, y_pred_gb))
+
+from sklearn.svm import SVC
+# Support Vector Machine model
+svm_model = SVC(kernel='rbf', random_state=42)
+svm_model.fit(X_train_scaled, y_train)
+y_pred_svm = svm_model.predict(X_test_scaled)
+accuracy_svm = accuracy_score(y_test, y_pred_svm)
+print("Support Vector Machine Accuracy:", accuracy_svm)
+print("Support Vector Machine Classification Report:")
+print(classification_report(y_test, y_pred_svm))
+
+from sklearn.neighbors import KNeighborsClassifier
+# K-Nearest Neighbors model
+knn_model = KNeighborsClassifier(n_neighbors=5)
+knn_model.fit(X_train_scaled, y_train)
+y_pred_knn = knn_model.predict(X_test_scaled)
+accuracy_knn = accuracy_score(y_test, y_pred_knn)
+print("K-Nearest Neighbors Accuracy:", accuracy_knn)
+print("K-Nearest Neighbors Classification Report:")
+print(classification_report(y_test, y_pred_knn))
+
+import xgboost as xgb
+# XGBoost model
+xgb_model = xgb.XGBClassifier(random_state=42)
+xgb_model.fit(X_train_scaled, y_train)
+y_pred_xgb = xgb_model.predict(X_test_scaled)
+accuracy_xgb = accuracy_score(y_test, y_pred_xgb)
+print("XGBoost Accuracy:", accuracy_xgb)
+print("XGBoost Classification Report:")
+print(classification_report(y_test, y_pred_xgb))
+
+import matplotlib.pyplot as plt
+
+# Define the models and their accuracies
+models = ['Random Forest', 'XGBoost', 'Support Vector Machine','Gradient Boost']  # actual model names
+accuracies = [accuracy, accuracy_xgb, accuracy_svm, accuracy_gb]  # actual accuracies
+
+# Create bar plot
+plt.figure(figsize=(10, 6))
+plt.bar(models, accuracies, color='red')
+plt.xlabel('Model')
+plt.ylabel('Accuracy')
+plt.title('Accuracy of Different Models  with 87% Accuracy Rate')
+plt.ylim(0, 1)  # Set y-axis limit from 0 to 1
+plt.show()
+
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+import xgboost as xgb
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+# Step 1: Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 2: Define preprocessing steps
+numeric_features = ['CreditScore', 'Age', 'Tenure', 'Balance', 'NumOfProducts', 'EstimatedSalary']
+categorical_features = ['Geography', 'Gender']
+
+numeric_transformer = Pipeline(steps=[
+    ('scaler', StandardScaler())
+])
+
+categorical_transformer = Pipeline(steps=[
+    ('onehot', OneHotEncoder())
+])
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numeric_transformer, numeric_features),
+        ('cat', categorical_transformer, categorical_features)
+    ])
+
+# Step 3: Define the models
+models = {
+    "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
+    "XGBoost": xgb.XGBClassifier(random_state=42),
+    "KNN": KNeighborsClassifier(),
+    "SVM": SVC(),
+    "Gradient Boosting": GradientBoostingClassifier(),
+    "Logistic Regression": LogisticRegression()
+}
+
+# Step 4: Train and evaluate the models
+accuracies = {}
+for name, model in models.items():
+    pipeline = Pipeline(steps=[('preprocessor', preprocessor),
+                               ('classifier', model)])
+    pipeline.fit(X_train, y_train)
+    accuracies[name] = pipeline.score(X_test, y_test)
+
+# Plot accuracies
+plt.figure(figsize=(10, 8))
+plt.bar(accuracies.keys(), accuracies.values(), color='lightgreen')
+plt.xlabel('Model')
+plt.ylabel('Accuracy')
+plt.title('Accuracy of Different Models')
+plt.ylim(0, 1)
+plt.xticks(rotation=45)
+plt.show()
+
+
+# Total number of male customers
+total_male_customers = df[df['Gender'] == 'Male'].shape[0]
+
+# Number of churned male customers
+churned_male_customers = df[(df['Gender'] == 'Male') & (df['Exited'] == 1)].shape[0]
+
+# Percentage of churned male customers
+percentage_churned_male = (churned_male_customers / total_male_customers) * 100
+
+print("Percentage of churned male customers:", percentage_churned_male)
+
+# Total number of female customers
+total_female_customers = df[df['Gender'] == 'Female'].shape[0]
+
+# Number of churned female customers
+churned_female_customers = df[(df['Gender'] == 'Female') & (df['Exited'] == 1)].shape[0]
+
+# Percentage of churned female customers
+percentage_churned_female = (churned_female_customers / total_female_customers) * 100
+
+print("Percentage of churned female customers:", percentage_churned_female)
+
+
+import matplotlib.pyplot as plt
+# Data
+labels = ['Male', 'Female']
+sizes = [percentage_churned_male, percentage_churned_female]
+colors = ['lightblue', 'lightcoral']
+# Plot
+plt.figure(figsize=(8, 6))
+plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+plt.title('Churn Percentage by Gender')
+plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+plt.show()
+
+#Conclusion:
+
+In conclusion, the Customer Churn Prediction project on GitHub has been a fulfilling journey of exploration and discovery. Through extensive experimentation with various machine learning models including Logistic Regression, XGBoost, Gradient Boosting, SVM, Random Forest, and KNN, we've achieved impressive accuracy rates.
+
+Notably, models such as XGBoost, Gradient Boosting, and Random Forest demonstrated exceptional performance, boasting an accuracy of 87%. SVM closely followed with an accuracy of 86%, while KNN and Logistic Regression achieved accuracies of 84% and 81%, respectively.
+
+Moreover, our analysis uncovered an intriguing trend: female customers exhibited a higher churn rate compared to their male counterparts, with female churn standing at 60.4% and male churn at 39.6%.
+
+These findings underscore the importance of personalized retention strategies tailored to the unique characteristics and preferences of different customer segments.
