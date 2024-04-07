@@ -1,0 +1,244 @@
+#Internship at codsoft(Task 4)
+#importing all necessary libararies
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import re
+import nltk
+import string
+from nltk.corpus import stopwords
+from nltk.stem import LancasterStemmer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report, accuracy_score
+
+# Load the training data
+train_path = "train_data.txt"
+train_data = pd.read_csv(train_path, sep=':::', names=['Title', 'Genre', 'Description'], engine='python')
+
+#printing training dataset
+print(train_data.describe())
+
+print(train_data.info())
+
+print(train_data.isnull().sum())
+
+# Load the test data
+test_path = "test_data.txt"
+test_data = pd.read_csv(test_path, sep=':::', names=['Id', 'Title', 'Description'], engine='python')
+test_data.head(54214)
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Plot the distribution of genres in the training data
+plt.figure(figsize=(14, 7))
+sns.countplot(data=train_data, y='Genre', order=train_data['Genre'].value_counts().index)
+plt.xlabel('Count', fontsize=14, fontweight='bold')
+plt.ylabel('Genre', fontsize=14, fontweight='bold')
+plt.show()
+
+# Plot the distribution of genres using a bar plot
+plt.figure(figsize=(14, 7))
+counts = train_data['Genre'].value_counts()
+sns.barplot(x=counts.index, y=counts)
+plt.xlabel('Genre', fontsize=14, fontweight='bold')
+plt.ylabel('Count', fontsize=14, fontweight='bold')
+plt.title('Distribution of Genres', fontsize=16, fontweight='bold')
+plt.xticks(rotation=90, fontsize=14, fontweight='bold')
+plt.show()
+
+import re
+import string
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import LancasterStemmer
+
+# Initialize the stemmer and stop words
+stemmer = LancasterStemmer()
+stop_words = set(stopwords.words('english'))
+
+# Define the clean_text function
+def clean_text(text):
+    text = text.lower()  # Lowercase all characters
+    text = re.sub(r'@\S+', '', text)  # Remove Twitter handles
+    text = re.sub(r'http\S+', '', text)  # Remove URLs
+    text = re.sub(r'pic.\S+', '', text)
+    text = re.sub(r"[^a-zA-Z+']", ' ', text)  # Keep only characters
+    text = re.sub(r'\s+[a-zA-Z]\s+', ' ', text + ' ')  # Keep words with length > 1 only
+    text = "".join([i for i in text if i not in string.punctuation])
+    words = nltk.word_tokenize(text)
+    stopwords = nltk.corpus.stopwords.words('english')  # Remove stopwords
+    text = " ".join([i for i in words if i not in stopwords and len(i) > 2])
+    text = re.sub(r"\s+", " ", text).strip()  # Remove repeated/leading/trailing spaces
+    return text
+
+# Apply the clean_text function to the 'Description' column in the training and test data
+train_data['Text_cleaning'] = train_data['Description'].apply(clean_text)
+test_data['Text_cleaning'] = test_data['Description'].apply(clean_text)
+
+# Calculate the length of cleaned text
+train_data['length_Text_cleaning'] = train_data['Text_cleaning'].apply(len)
+# Visualize the distribution of text lengths
+plt.figure(figsize=(10, 7))
+sns.histplot(data=train_data, x='length_Text_cleaning', bins=20, kde=True, color='red')
+plt.xlabel('Length', fontsize=15, fontweight='bold')
+plt.ylabel('Frequency', fontsize=15, fontweight='bold')
+plt.title('Distribution of Lengths', fontsize=18, fontweight='bold')
+plt.show()
+
+#defined X and y
+X = train_data['Text_cleaning']
+y = train_data['Genre']
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import LinearSVC
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report, accuracy_score
+
+# Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize TF-IDF vectorizer and LinearSVC classifier
+tfidf_vectorizer = TfidfVectorizer()
+svm_classifier = LinearSVC(dual=False)
+
+# Constructing the pipeline
+pipeline = Pipeline([
+    ('tfidf', tfidf_vectorizer),
+    ('svm', svm_classifier)
+])
+
+# Train the pipeline (vectorizer + classifier)
+pipeline.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = pipeline.predict(X_test)
+
+# Evaluate the performance of the model
+svm_accuracy = accuracy_score(y_test, y_pred)
+
+# Print SVM Classifier Accuracy
+print("SVM Classifier Accuracy:", svm_accuracy)
+
+# Print SVM Classifier Report
+print("SVM Classifier Report:")
+print(classification_report(y_test, y_pred))
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Initialize TF-IDF vectorizer
+tfidf_vectorizer = TfidfVectorizer()
+
+# Fit and transform the training data
+X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+
+# Transform the test data
+X_test_tfidf = tfidf_vectorizer.transform(X_test)
+
+# Initialize Logistic Regression classifier
+logistic_classifier = LogisticRegression(max_iter=1000)
+
+# Train Logistic Regression classifier
+logistic_classifier.fit(X_train_tfidf, y_train)
+
+# Make predictions on the test set
+y_pred_logistic = logistic_classifier.predict(X_test_tfidf)
+
+# Calculate accuracy
+logistic_accuracy = accuracy_score(y_test, y_pred_logistic)
+
+# Generate classification report with zero_division parameter
+logistic_report = classification_report(y_test, y_pred_logistic, zero_division=1)
+
+# Print accuracy and report
+print("Logistic Regression Accuracy:", logistic_accuracy)
+print("Logistic Regression Report:")
+print(logistic_report)
+
+# Training Naive Bayes classifier
+naive_bayes_classifier = MultinomialNB()
+naive_bayes_classifier.fit(X_train_tfidf, y_train)
+
+print("\nNaive Bayes Classifier Accuracy:", naive_bayes_accuracy)
+print("Naive Bayes Classifier Report:")
+print(naive_bayes_report)
+
+# Check the column names of the DataFrame
+print(test_data.columns)
+
+# Check the length of the DataFrame
+print("Length of test_data:", len(test_data))
+
+# Check the length of the predictions
+print("Length of X_test_predictions:", len(X_test_predictions))
+
+
+# Transform the test data using the TF-IDF vectorizer fitted on the training data
+X_test_tfidf = tfidf_vectorizer.transform(test_data['Text_cleaning'])
+
+# Make predictions on the test data
+X_test_predictions = naive_bayes_classifier.predict(X_test_tfidf)
+
+# Add the predicted genres to the test_data DataFrame
+test_data['Predicted_Genre'] = X_test_predictions
+
+# Print the first few rows of the DataFrame with the added predicted genre column
+print(test_data[['Id', 'Title', 'Description', 'Text_cleaning', 'Predicted_Genre']].head(15))
+
+# Initialize classifiers
+classifiers = {
+    'SVM': LinearSVC(dual=False),
+    'Logistic Regression': LogisticRegression(max_iter=1000),
+    'Naive Bayes': MultinomialNB()
+}
+
+# Lists to store accuracies
+accuracy_scores = []
+
+# Train and evaluate each classifier
+for name, classifier in classifiers.items():
+    # Constructing the pipeline
+    pipeline = Pipeline([
+        ('tfidf', tfidf_vectorizer),
+        ('classifier', classifier)
+    ])
+
+    # Train the pipeline
+    pipeline.fit(X_train, y_train)
+
+    # Make predictions on the test set
+    y_pred = pipeline.predict(X_test)
+
+    # Calculate accuracy
+    accuracy = accuracy_score(y_test, y_pred)
+    accuracy_scores.append(accuracy)
+    print(f"{name} Accuracy: {accuracy}")
+
+# Plot the accuracies
+plt.figure(figsize=(10, 6))
+plt.bar(classifiers.keys(), accuracy_scores, color=['blue', 'green', 'orange'])
+plt.xlabel('Classifier')
+plt.ylabel('Accuracy')
+plt.title('Accuracy of Different Classifiers')
+plt.ylim(0, 1)
+plt.show()
+
+Conclusion
+
+In conclusion, the completion of Task 4: Movie Genre Classification marks a significant milestone in our journey at Codesoft. Through diligent exploration and experimentation, we've achieved notable accuracies using SVM, Logistic Regression, and Naive Bayes models: SVM - 59%, Logistic Regression - 58%, and Naive Bayes - 45%.
+
+By harnessing the power of machine learning techniques, we've successfully classified movies into genres like Drama, Documentary, Horror, and more, solely based on their titles. This project underscores the potential of data science in unraveling complex patterns within the entertainment industry.
+
+We invite you to explore our codebase, contribute your ideas, and join us in advancing the fusion of technology and cinema. Together, let's continue pushing the boundaries of innovation at Codesoft!
